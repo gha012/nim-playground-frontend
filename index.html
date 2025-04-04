@@ -1,22 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Nim playground</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <script src="/codemirror/lib/codemirror.js"></script>
-  <script src="/codemirror/mode/nim/nim.js"></script>
-  <script type="text/javascript" src="/assets/purify.min.js"></script>
-  <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
-  <link rel="stylesheet" href="/codemirror/dracula.css">
-  <link href='/assets/styles.css' rel='stylesheet' type='text/css'>
-  <link href="https://fonts.googleapis.com/css?family=Inconsolata|Open+Sans|Titillium+Web" rel="stylesheet">
-  <link rel="icon" type="image/png" href="/assets/logo_bw.png">
-</head>
-<body id="body">
-<div id="ROOT" />
-<script type="text/javascript" src="/assets/frontend.js"></script>
-</body>
-</html>
+const { Client, GatewayIntentBits } = require('discord.js');
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+
+client.once('ready', () => {
+    console.log(`تم تسجيل دخول البوت كـ ${client.user.tag}`);
+});
+
+client.on('messageCreate', message => {
+    if (message.content === '!بومب') {
+        message.channel.send('💣 لعبة بومب بدأت! اكتب "انفجر" لتفجير القنبلة.');
+
+        let chances = 3;
+        const filter = response => response.content.toLowerCase() === 'انفجر' && response.author.id !== client.user.id;
+
+        const collector = message.channel.createMessageCollector({ filter, time: 30000 });
+
+        collector.on('collect', response => {
+            if (chances > 0) {
+                chances--;
+                const explosion = Math.random() < 0.3; // 30% فرصة للانفجار
+                if (explosion) {
+                    message.channel.send(`${response.author} 💥 انفجرت القنبلة! أعد المحاولة!`);
+                    collector.stop(); // إنهاء اللعبة
+                } else {
+                    message.channel.send(`${response.author} ✅ لقد نجوت! تبقى لديك ${chances} فرص.`);
+                }
+            } else {
+                message.channel.send('⚠️ لم يتبق لديك فرص! اللعبة انتهت.');
+                collector.stop(); // إنهاء اللعبة
+            }
+        });
+
+        collector.on('end', collected => {
+            if (chances === 0) {
+                message.channel.send('🏁 اللعبة انتهت! شكراً للعب!');
+            } else {
+```bash
+                message.channel.send('⏰ انتهت مدة اللعبة!');
+            }
+        });
+    }
+});
+
+client.login('MTM1Nzg1ODk3ODA4NzgyOTcxNA.GByurY.Gb4fzyeBpHgcPgw7OZVUZNugCEwoYF3ccaPAek'); //
